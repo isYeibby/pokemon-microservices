@@ -18,7 +18,7 @@
         <module>config-server</module>
         <module>eureka-server</module>
         <module>api-gateway</module>
-        <!-- <module>pokemon-service</module> -->
+        <module>pokemon-service</module>
         <!-- <module>trainer-service</module> -->
         <!-- <module>team-service</module> -->
     </modules>
