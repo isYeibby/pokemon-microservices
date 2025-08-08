@@ -1,0 +1,48 @@
+# Eureka Server Configuration
+spring:
+  application:
+    name: eureka-server
+
+  # Config Server connection
+  config:
+    import: "optional:configserver:http://localhost:8888"
+
+# Local configuration (fallback if Config Server is not available)
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: localhost
+    prefer-ip-address: false
+  client:
+    # No se registra a sí mismo
+    register-with-eureka: false
+    # No busca otros servicios de registro
+    fetch-registry: false
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  server:
+    # Configuraciones de servidor
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 30000
+    response-cache-update-interval-ms: 5000
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    com.netflix.eureka: INFO
+    com.netflix.discovery: INFO
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

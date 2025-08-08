@@ -16,7 +16,7 @@
     <!-- Módulos existentes (comentamos los que no existen aún) -->
     <modules>
         <module>config-server</module>
-        <!-- <module>eureka-server</module> -->
+        <module>eureka-server</module>
         <!-- <module>api-gateway</module> -->
         <!-- <module>pokemon-service</module> -->
         <!-- <module>trainer-service</module> -->
