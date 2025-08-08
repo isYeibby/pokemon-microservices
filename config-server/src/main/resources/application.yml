@@ -1,0 +1,34 @@
+# Config Server Configuration - Simple Version
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+
+  # Configuración nativa simple
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config
+
+  # Activar profile native
+  profiles:
+    active: native
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# Logging simple
+logging:
+  level:
+    org.springframework.cloud.config: INFO
+    root: INFO

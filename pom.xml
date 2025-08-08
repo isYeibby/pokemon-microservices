@@ -13,24 +13,24 @@
     <name>Pokemon Microservices Parent</name>
     <description>Pokemon Microservices Architecture with Spring Boot and Spring Cloud</description>
 
-    <!-- Módulos hijos -->
+    <!-- Módulos existentes (comentamos los que no existen aún) -->
     <modules>
         <module>config-server</module>
-        <module>eureka-server</module>
-        <module>api-gateway</module>
-        <module>pokemon-service</module>
-        <module>trainer-service</module>
-        <module>team-service</module>
+        <!-- <module>eureka-server</module> -->
+        <!-- <module>api-gateway</module> -->
+        <!-- <module>pokemon-service</module> -->
+        <!-- <module>trainer-service</module> -->
+        <!-- <module>team-service</module> -->
     </modules>
 
-    <!-- Propiedades ACTUALIZADAS PARA JAVA 21 -->
+    <!-- El resto del pom.xml igual... -->
     <properties>
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- Versiones de Spring (actualizadas para mejor soporte Java 21) -->
+        <!-- Versiones de Spring -->
         <spring-boot.version>3.2.0</spring-boot.version>
         <spring-cloud.version>2023.0.0</spring-cloud.version>
 
@@ -40,7 +40,7 @@
         <openapi.version>2.3.0</openapi.version>
     </properties>
 
-    <!-- Spring Boot Parent ACTUALIZADO -->
+    <!-- Spring Boot Parent -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -48,7 +48,7 @@
         <relativePath/>
     </parent>
 
-    <!-- El resto del pom.xml igual... -->
+    <!-- Gestión de dependencias -->
     <dependencyManagement>
         <dependencies>
             <!-- Spring Cloud BOM -->
