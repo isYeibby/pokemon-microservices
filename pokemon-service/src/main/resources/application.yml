@@ -16,6 +16,15 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    # Deshabilitar open-in-view para evitar lazy loading issues
+    open-in-view: false
+
+  # Configuración Jackson simple
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
 
 # Fallback configuration (if Config Server is down)
 server:
@@ -36,7 +45,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,mappings
   endpoint:
     health:
       show-details: always

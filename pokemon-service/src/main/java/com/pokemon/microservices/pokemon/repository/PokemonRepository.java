@@ -15,78 +15,108 @@ import java.util.Optional;
 @Repository
 public interface PokemonRepository extends JpaRepository<Pokemon, Long> {
 
-    // Basic finders
-    Optional<Pokemon> findByPokedexNumber(Integer pokedexNumber);
+    // ========== BÚSQUEDAS BÁSICAS ==========
+
     Optional<Pokemon> findByNameIgnoreCase(String name);
+    Optional<Pokemon> findByPokedexNumber(Integer pokedexNumber);
 
-    // Existence checks
-    boolean existsByNameIgnoreCase(String name);
-    boolean existsByPokedexNumber(Integer pokedexNumber);
+    // ========== BÚSQUEDAS POR TEXTO ==========
 
-    // Type-based queries
+    List<Pokemon> findByNameContainingIgnoreCase(String name);
+
+    @Query("SELECT p FROM Pokemon p WHERE " +
+            "LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+            "LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    List<Pokemon> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            @Param("searchTerm") String name, @Param("searchTerm") String description);
+
+    @Query("SELECT p FROM Pokemon p WHERE " +
+            "LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+            "LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    Page<Pokemon> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            @Param("searchTerm") String name, @Param("searchTerm") String description, Pageable pageable);
+
+    // ========== BÚSQUEDAS POR TIPO ==========
+
+    @Query("SELECT p FROM Pokemon p WHERE p.primaryType.name = :typeName OR p.secondaryType.name = :typeName")
+    List<Pokemon> findByPrimaryTypeNameIgnoreCaseOrSecondaryTypeNameIgnoreCase(
+            @Param("typeName") String primaryTypeName, @Param("typeName") String secondaryTypeName);
+
+    List<Pokemon> findByPrimaryTypeOrSecondaryType(PokemonType primaryType, PokemonType secondaryType);
+
     List<Pokemon> findByPrimaryType(PokemonType primaryType);
     List<Pokemon> findBySecondaryType(PokemonType secondaryType);
-    List<Pokemon> findByPrimaryTypeOrSecondaryType(PokemonType type1, PokemonType type2);
 
-    // Generation and special Pokemon
+    // ========== BÚSQUEDAS POR GENERACIÓN ==========
+
     List<Pokemon> findByGeneration(Integer generation);
+    Long countByGeneration(Integer generation);
+
+    // ========== BÚSQUEDAS POR CARACTERÍSTICAS ==========
+
     List<Pokemon> findByIsLegendaryTrue();
     List<Pokemon> findByIsMythicalTrue();
     List<Pokemon> findByIsLegendaryTrueOrIsMythicalTrue();
 
-    // Evolution queries
-    List<Pokemon> findByEvolvesFromIsNull(); // Base forms (no pre-evolution)
-    List<Pokemon> findByEvolvesToIsNull(); // Final forms (no evolution)
-    List<Pokemon> findByEvolvesFromIsNotNull(); // Evolved forms
+    // ========== BÚSQUEDAS POR ESTADÍSTICAS ==========
 
-    // Search and filtering
-    @Query("SELECT p FROM Pokemon p WHERE " +
-            "LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    Page<Pokemon> searchByNameOrDescription(@Param("searchTerm") String searchTerm, Pageable pageable);
+    List<Pokemon> findByHpGreaterThanEqual(Integer hp);
+    List<Pokemon> findByAttackGreaterThanEqual(Integer attack);
+    List<Pokemon> findByDefenseGreaterThanEqual(Integer defense);
+    List<Pokemon> findBySpecialAttackGreaterThanEqual(Integer specialAttack);
+    List<Pokemon> findBySpecialDefenseGreaterThanEqual(Integer specialDefense);
+    List<Pokemon> findBySpeedGreaterThanEqual(Integer speed);
 
-    @Query("SELECT p FROM Pokemon p WHERE p.name LIKE %:name%")
-    List<Pokemon> findByNameContainingIgnoreCase(@Param("name") String name);
+    // ========== BÚSQUEDAS POR EVOLUCIÓN ==========
 
-    // Stats-based queries
-    @Query("SELECT p FROM Pokemon p WHERE " +
-            "(p.stats.hp + p.stats.attack + p.stats.defense + " +
-            "p.stats.specialAttack + p.stats.specialDefense + p.stats.speed) >= :minTotal")
-    List<Pokemon> findByMinTotalStats(@Param("minTotal") Integer minTotal);
+    List<Pokemon> findByEvolvesFromIsNull(); // Pokemon base (primera evolución)
+    List<Pokemon> findByEvolvesToIsNull(); // Pokemon final (última evolución)
+    List<Pokemon> findByEvolvesFromIsNotNull(); // Pokemon que evolucionan de otros
+    List<Pokemon> findByEvolvesToIsNotNull(); // Pokemon que evolucionan a otros
 
-    @Query("SELECT p FROM Pokemon p WHERE p.stats.speed >= :minSpeed ORDER BY p.stats.speed DESC")
-    List<Pokemon> findFastestPokemon(@Param("minSpeed") Integer minSpeed);
+    // ========== CONTEOS ==========
 
-    @Query("SELECT p FROM Pokemon p WHERE p.stats.attack >= :minAttack ORDER BY p.stats.attack DESC")
-    List<Pokemon> findStrongestPokemon(@Param("minAttack") Integer minAttack);
+    @Query("SELECT COUNT(p) FROM Pokemon p WHERE p.primaryType = :type OR p.secondaryType = :type")
+    Long countByPrimaryTypeOrSecondaryType(@Param("type") PokemonType primaryType, @Param("type") PokemonType secondaryType);
 
-    // Size-based queries
-    List<Pokemon> findByHeightGreaterThanEqual(Double minHeight);
-    List<Pokemon> findByWeightGreaterThanEqual(Double minWeight);
+    @Query("SELECT COUNT(p) FROM Pokemon p WHERE p.primaryType = :type")
+    Long countByPrimaryType(@Param("type") PokemonType type);
 
-    // Advanced filtering
+    @Query("SELECT COUNT(p) FROM Pokemon p WHERE p.secondaryType = :type")
+    Long countBySecondaryType(@Param("type") PokemonType type);
+
+    // ========== CONSULTAS PERSONALIZADAS ==========
+
     @Query("SELECT p FROM Pokemon p WHERE " +
             "(:generation IS NULL OR p.generation = :generation) AND " +
             "(:primaryType IS NULL OR p.primaryType = :primaryType) AND " +
             "(:isLegendary IS NULL OR p.isLegendary = :isLegendary) AND " +
-            "(:minPokedexNumber IS NULL OR p.pokedexNumber >= :minPokedexNumber) AND " +
-            "(:maxPokedexNumber IS NULL OR p.pokedexNumber <= :maxPokedexNumber)")
-    Page<Pokemon> findWithFilters(
-            @Param("generation") Integer generation,
-            @Param("primaryType") PokemonType primaryType,
-            @Param("isLegendary") Boolean isLegendary,
-            @Param("minPokedexNumber") Integer minPokedexNumber,
-            @Param("maxPokedexNumber") Integer maxPokedexNumber,
-            Pageable pageable);
+            "(:minPokedex IS NULL OR p.pokedexNumber >= :minPokedex) AND " +
+            "(:maxPokedex IS NULL OR p.pokedexNumber <= :maxPokedex)")
+    Page<Pokemon> findWithFilters(@Param("generation") Integer generation,
+                                  @Param("primaryType") PokemonType primaryType,
+                                  @Param("isLegendary") Boolean isLegendary,
+                                  @Param("minPokedex") Integer minPokedexNumber,
+                                  @Param("maxPokedex") Integer maxPokedexNumber,
+                                  Pageable pageable);
 
-    // Statistics queries
-    @Query("SELECT COUNT(p) FROM Pokemon p WHERE p.generation = :generation")
-    Long countByGeneration(@Param("generation") Integer generation);
+    @Query("SELECT p FROM Pokemon p ORDER BY (p.hp + p.attack + p.defense + p.specialAttack + p.specialDefense + p.speed) DESC")
+    List<Pokemon> findTopByTotalStatsOrderByTotalStatsDesc(Pageable pageable);
 
-    @Query("SELECT COUNT(p) FROM Pokemon p WHERE p.primaryType = :type OR p.secondaryType = :type")
-    Long countByType(@Param("type") PokemonType type);
+    @Query("SELECT p FROM Pokemon p ORDER BY p.speed DESC")
+    List<Pokemon> findTopBySpeedOrderBySpeedDesc(Pageable pageable);
 
-    @Query("SELECT AVG(p.stats.hp + p.stats.attack + p.stats.defense + " +
-            "p.stats.specialAttack + p.stats.specialDefense + p.stats.speed) FROM Pokemon p")
+    @Query("SELECT p FROM Pokemon p ORDER BY p.attack DESC")
+    List<Pokemon> findTopByAttackOrderByAttackDesc(Pageable pageable);
+
+    // ========== ESTADÍSTICAS ==========
+
+    @Query("SELECT AVG(p.hp + p.attack + p.defense + p.specialAttack + p.specialDefense + p.speed) FROM Pokemon p")
     Double getAverageTotalStats();
+
+    @Query("SELECT MAX(p.hp + p.attack + p.defense + p.specialAttack + p.specialDefense + p.speed) FROM Pokemon p")
+    Integer getMaxTotalStats();
+
+    @Query("SELECT MIN(p.hp + p.attack + p.defense + p.specialAttack + p.specialDefense + p.speed) FROM Pokemon p")
+    Integer getMinTotalStats();
 }
